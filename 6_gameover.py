@@ -1,4 +1,6 @@
 import os
+from sys import int_info
+
 import pygame
 #########################################################
 # 기본 초기화 (반드시해야 하는 것들)
@@ -78,6 +80,14 @@ balls.append({
 # 사라질 무기, 공 정보 저장 변수
 weapon_to_remove = -1
 ball_to_remove = -1
+
+# Font 정의
+game_font = pygame.font.Font(None, 40)
+total_time = 100
+start_ticks = pygame.time.get_ticks() # 시작시간 정의
+# 게임 종료 메시지 / time out , misson complete, Game over
+game_result = "Game Over"
+
 
 running = True
 while running:
@@ -219,7 +229,11 @@ while running:
     if weapon_to_remove > -1:
         del weapons[weapon_to_remove]
         weapon_to_remove = -1
-        
+
+    # 모든 공을 없앤 경우 게임 종료 (성공)
+    if len(balls) == 0:
+        game_result = "Misson Complete"
+        running = False
 
 
     # 5. 화면의 그리기
@@ -236,11 +250,34 @@ while running:
         ball_img_idx = val["img_idx"]
         screen.blit(ball_images[ball_img_idx], (ball_pos_x, ball_pos_y ))
 
+        # 경과 시간 계산
+        elapsed_time = (pygame.time.get_ticks() - start_ticks) / 1000 # ms -> s
+        timer = game_font.render("Time : {}".format(int(total_time - elapsed_time)), True, (255, 255, 255))
+        screen.blit(timer, (10, 10))
+        
+        # 시간 초과 했다면 
+        if total_time - elapsed_time <= 0:
+            game_result = "Time Over"
+            running = False
+
+
     pygame.display.update()
+# 게임 오버 메시지
+msg = game_font.render(game_result, True, (255, 255, 0)) # 노란색
+msg_rect = msg.get_rect(center=(int(screen_width / 2),int (screen_height / 2)))
+screen.blit(msg, msg_rect)
+pygame.display.update()
+
+
+
+# 2초 대기
+pygame.time.delay(2000)
 
 pygame.quit()
 
 
 
 
+
+                                
 
